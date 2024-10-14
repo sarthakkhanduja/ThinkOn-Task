@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 public class UserServiceImplementation implements UserService {
@@ -43,14 +44,37 @@ public class UserServiceImplementation implements UserService {
     }
 
     // This simply returns all the users present in the file
+    @Override
     public List<User> getAllUsers() {
         return users;
     }
 
     // This method takes an input of the ID, and returns the first user found with that ID.
     // I need to add error handling in this, I'll add it later.
+    @Override
     public Optional<User> getUserById(Long id) {
         Stream<User> usersStream = users.stream();
         return usersStream.filter(user -> user.getId().equals(id)).findFirst();
+    }
+
+    @Override
+    public User updateUser(Long id, User updatedUser) {
+        Optional<User> existingUserOpt = getUserById(id);
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+
+            existingUser.setUsername(updatedUser.getUsername());
+            existingUser.setFirstName(updatedUser.getFirstName());
+            existingUser.setLastName(updatedUser.getLastName());
+            existingUser.setEmail(updatedUser.getEmail());
+            existingUser.setPhone(updatedUser.getPhone());
+
+            saveUsers();
+
+            return existingUser;
+        } else {
+            //Error handling required here, throw an exception rather
+            return null;
+        }
     }
 }
