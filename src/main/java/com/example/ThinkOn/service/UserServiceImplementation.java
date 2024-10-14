@@ -13,16 +13,13 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
+@Service
 public class UserServiceImplementation implements UserService {
 
     // Path to JSON file acting as the DB
     private static final String USER_FILE = "users.json";
     private List<User> users = new ArrayList<>();
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    public UserServiceImplementation() {
-        loadUsers();
-    }
 
     // Helper method for generating an ID
     // The idea is to either treat this as the first ID being generated
@@ -31,6 +28,33 @@ public class UserServiceImplementation implements UserService {
         return users.isEmpty() ? 1L : users.get(users.size() - 1).getId() + 1;
     }
 
+    private void loadUsers() {
+        try {
+            File file = new File(USER_FILE);
+            if (file.exists()) {
+                users = objectMapper.readValue(file, new TypeReference<List<User>>() {
+                });
+            }
+        } catch (IOException e) {
+            // Put logging here
+            e.printStackTrace();
+        }
+    }
+
+     private void saveUsers() {
+        try {
+            objectMapper.writeValue(new File(USER_FILE), users);
+
+        } catch (IOException e) {
+            // Put logging here
+            e.printStackTrace();
+        }
+     }
+
+    // Load all the users before performing any business logic
+    public UserServiceImplementation() {
+        loadUsers();
+    }
     // This method generates an ID using the helper function,
     // adds it to the users array list,
     // saves it to the file
@@ -75,6 +99,18 @@ public class UserServiceImplementation implements UserService {
         } else {
             //Error handling required here, throw an exception rather
             return null;
+        }
+    }
+
+    @Override
+    public boolean deleteUser(Long id) {
+        Optional<User> user = getUserById(id);
+        if (user.isPresent()) {
+            users.remove(user.get());
+            saveUsers();
+            return true;
+        } else {
+            return false;
         }
     }
 }
