@@ -61,6 +61,7 @@ public class UserServiceImplementation implements UserService {
     // Returns the created user
     @Override
     public User createUser(User user) {
+        System.out.println("Creating User..." + user);
         user.setId(generateId());
         users.add(user);
         saveUsers();
